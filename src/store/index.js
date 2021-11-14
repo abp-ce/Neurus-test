@@ -8,7 +8,7 @@ export default new Vuex.Store({
   state: {
     turnstileList: [],
     eventList: [],
-    changed: false
+    savedSessions: []
   },
   mutations: {
     initTurnstileList(state, data) {
@@ -19,8 +19,8 @@ export default new Vuex.Store({
       //console.log(data)
       state.eventList = data
     },
-    saved(state) {
-      state.changed = false
+    saveSession(state, data) {
+      state.savedSessions.push(data)
     },
     addEvent(state,data) {
       state.eventList.push({
@@ -31,7 +31,6 @@ export default new Vuex.Store({
         "productCount": 1,
         "sessionId": data.sessionId
       })
-      state.changed = true
     },
     editEvent(state, data) {
       state.eventList = state.eventList.filter(e => !(e.productName == data.productName && e.sessionId == data.sessionId))
@@ -43,10 +42,9 @@ export default new Vuex.Store({
         "productCount": data.productCount,
         "sessionId": data.sessionId
       })
-      state.changed = true
     },
     deleteEvent(state, data) {
-      console.log(data.name,data.sessionId)
+      //console.log(data.name,data.sessionId)
       state.eventList.map(e => {
         if (e.productName == data.name && e.sessionId == data.sessionId) {
           e.sessionId = ''
@@ -54,7 +52,6 @@ export default new Vuex.Store({
           e.id = 0
         }
       })
-      state.changed = true
     }
   },
   actions: {
@@ -63,9 +60,6 @@ export default new Vuex.Store({
     },
     getEventList({commit}) {
       axios.get("events.json").then(response => commit('initEventList',response.data));
-    },
-    saveEvenList() {
-      
     }
   },
   getters: {
@@ -77,7 +71,8 @@ export default new Vuex.Store({
       if (el.productName == payload.name && el.sessionId == payload.sessionId) return acc += el.productCount
       return acc
     },0),
-    lastEventId: state => Math.max(...state.eventList.map(e => e.id))
+    lastEventId: state => Math.max(...state.eventList.map(e => e.id)),
+    saved: state => payload => state.savedSessions.includes(payload)
   },
   modules: {
   }
